@@ -81,7 +81,8 @@ module Zip
     # not a local zip entry header.
     def initialize(filename, offset = 0)
       super()
-      @archiveIO = File.open(filename, "rb")
+      @archiveIO = filename.class == StringIO ? filename : File.open(filename, "rb")
+      # @archiveIO = File.open(filename, "rb")
       @archiveIO.seek(offset, IO::SEEK_SET)
       @decompressor = NullDecompressor.instance
       @currentEntry = nil
@@ -211,7 +212,8 @@ module Zip
     def internal_produce_input(buf = nil)
       retried = 0
       begin
-        @zlibInflater.inflate(@inputStream.read(Decompressor::CHUNK_SIZE, buf))
+        s = buf ? @inputStream.read(Decompressor::CHUNK_SIZE, buf) : @inputStream.read(Decompressor::CHUNK_SIZE)
+        @zlibInflater.inflate(s)
       rescue Zlib::BufError
         raise if (retried >= 5) # how many times should we retry?
         retried += 1
@@ -252,7 +254,11 @@ module Zip
 	numberOfBytes = @charsToRead-@readSoFar
       end
       @readSoFar += numberOfBytes
-      @inputStream.read(numberOfBytes, buf)
+      if buf
+        @inputStream.read(numberOfBytes, buf)
+      else
+        @inputStream.read(numberOfBytes)
+      end
     end
     
     def produce_input
