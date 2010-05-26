@@ -403,10 +403,25 @@ class ZipInputStreamTest < Test::Unit::TestCase
     assert_stream_contents(zis, TestZipFile::TEST_ZIP2)
     assert_equal(true, zis.eof?)
     zis.close    
+
+    # with StringIO
+    sio = StringIO.new(File.open(TestZipFile::TEST_ZIP2.zip_name).read)
+    zis = ZipInputStream.new(sio)    
+    assert_stream_contents(zis, TestZipFile::TEST_ZIP2)
+    assert_equal(true, zis.eof?)
+    zis.close    
   end
 
   def test_openWithBlock
     ZipInputStream.open(TestZipFile::TEST_ZIP2.zip_name) {
+      |zis|
+      assert_stream_contents(zis, TestZipFile::TEST_ZIP2)
+      assert_equal(true, zis.eof?)
+    }
+    
+    # with StringIO
+    sio = StringIO.new(File.open(TestZipFile::TEST_ZIP2.zip_name).read)
+    ZipInputStream.open(sio) {
       |zis|
       assert_stream_contents(zis, TestZipFile::TEST_ZIP2)
       assert_equal(true, zis.eof?)
@@ -416,10 +431,42 @@ class ZipInputStreamTest < Test::Unit::TestCase
   def test_openWithoutBlock
     zis = ZipInputStream.open(TestZipFile::TEST_ZIP2.zip_name)
     assert_stream_contents(zis, TestZipFile::TEST_ZIP2)
+
+    # with StringIO
+    sio = StringIO.new(File.open(TestZipFile::TEST_ZIP2.zip_name).read)
+    zis = ZipInputStream.open(sio)
+    assert_stream_contents(zis, TestZipFile::TEST_ZIP2)
   end
 
   def test_incompleteReads
     ZipInputStream.open(TestZipFile::TEST_ZIP2.zip_name) {
+      |zis|
+      entry = zis.get_next_entry # longAscii.txt
+      assert_equal(false, zis.eof?)
+      assert_equal(TestZipFile::TEST_ZIP2.entry_names[0], entry.name)
+      assert zis.gets.length > 0
+      assert_equal(false, zis.eof?)
+      entry = zis.get_next_entry # empty.txt
+      assert_equal(TestZipFile::TEST_ZIP2.entry_names[1], entry.name)
+      assert_equal(0, entry.size)
+      assert_equal(nil, zis.gets)
+      assert_equal(true, zis.eof?)
+      entry = zis.get_next_entry # empty_chmod640.txt
+      assert_equal(TestZipFile::TEST_ZIP2.entry_names[2], entry.name)
+      assert_equal(0, entry.size)
+      assert_equal(nil, zis.gets)
+      assert_equal(true, zis.eof?)
+      entry = zis.get_next_entry # short.txt
+      assert_equal(TestZipFile::TEST_ZIP2.entry_names[3], entry.name)
+      assert zis.gets.length > 0
+      entry = zis.get_next_entry # longBinary.bin
+      assert_equal(TestZipFile::TEST_ZIP2.entry_names[4], entry.name)
+      assert zis.gets.length > 0
+    }
+    
+    # with StringIO
+    sio = StringIO.new(File.open(TestZipFile::TEST_ZIP2.zip_name).read)
+    ZipInputStream.open(sio) {
       |zis|
       entry = zis.get_next_entry # longAscii.txt
       assert_equal(false, zis.eof?)
@@ -472,6 +519,35 @@ class ZipInputStreamTest < Test::Unit::TestCase
 
       assert_entry(e.name, zis, e.name)
     }
+    
+    # with StringIO
+    sio = StringIO.new(File.open(TestZipFile::TEST_ZIP2.zip_name).read)
+    ZipInputStream.open(sio) {
+      |zis|
+      e = zis.get_next_entry
+      assert_equal(TestZipFile::TEST_ZIP2.entry_names[0], e.name)
+
+      # Do a little reading
+      buf = ""
+      buf << zis.read(100)
+      buf << (zis.gets || "")
+      buf << (zis.gets || "")
+      assert_equal(false, zis.eof?)
+
+      zis.rewind
+
+      buf2 = ""
+      buf2 << zis.read(100)
+      buf2 << (zis.gets || "")
+      buf2 << (zis.gets || "")
+
+      assert_equal(buf, buf2)
+
+      zis.rewind
+      assert_equal(false, zis.eof?)
+
+      assert_entry(e.name, zis, e.name)
+    }
   end
 
   def test_mix_read_and_gets
@@ -485,8 +561,20 @@ class ZipInputStreamTest < Test::Unit::TestCase
       assert_equal("$VERBOSE =", zis.read(10))
       assert_equal(false, zis.eof?)
     }
+    
+    # wtih StringIO
+    sio = StringIO.new(File.open(TestZipFile::TEST_ZIP2.zip_name).read)
+    ZipInputStream.open(sio) {
+      |zis|
+      e = zis.get_next_entry
+      assert_equal("#!/usr/bin/env ruby", zis.gets.chomp)
+      assert_equal(false, zis.eof?)
+      assert_equal("", zis.gets.chomp)
+      assert_equal(false, zis.eof?)
+      assert_equal("$VERBOSE =", zis.read(10))
+      assert_equal(false, zis.eof?)
+    }    
   end
-  
 end
 
 
@@ -1144,11 +1232,11 @@ class ZipFileTest < Test::Unit::TestCase
 
   def test_rename
     entryToRename, *remainingEntries = TEST_ZIP.entry_names
-    
+
     zf = ZipFile.new(TEST_ZIP.zip_name)
     assert(zf.entries.map { |e| e.name }.include?(entryToRename))
     
-    newName = "changed name"
+    newName = "changed entry name"
     assert(! zf.entries.map { |e| e.name }.include?(newName))
 
     zf.rename(entryToRename, newName)
@@ -1158,7 +1246,9 @@ class ZipFileTest < Test::Unit::TestCase
 
     zfRead = ZipFile.new(TEST_ZIP.zip_name)
     assert(zfRead.entries.map { |e| e.name }.include?(newName))
-    zfRead.close
+    File.delete(ZipFileExtractTest::EXTRACTED_FILENAME) if File.exists?(ZipFileExtractTest::EXTRACTED_FILENAME)
+    zf.extract(newName, ZipFileExtractTest::EXTRACTED_FILENAME)
+    zfRead.close    
   end
 
   def test_renameToExistingEntry
