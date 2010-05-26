@@ -1,13 +1,13 @@
-= rubyzip
+= zip
 
-rubyzip is a ruby library for reading and writing zip files.
+zip is a ruby library for reading and writing zip files.
 
 = Install
 
 If you have rubygems you can install rubyzip directly from the gem
 repository
 
-  gem install rubyzip
+  gem install zip
 
 Otherwise obtain the source (see below) and run
 

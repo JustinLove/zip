@@ -8,13 +8,13 @@ require './lib/zip/version.rb'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = 'rubyzip2'
+    gem.name = 'zip'
     gem.version = Zip::VERSION
-    gem.summary = 'rubyzip2 is a Ruby library for reading and writing Zip files'
-    gem.description = 'rubyzip2 is a Ruby library for reading and writing Zip files. Unlike the official rubyzip, rubyzip2 is compatible with Ruby 1.9.1.'
-    gem.email = 'postmodern.mod3@gmail.com'
+    gem.summary = 'zip is a Ruby library for reading and writing Zip files'
+    gem.description = 'zip is a Ruby library for reading and writing Zip files. Unlike the official rubyzip, zip is compatible with Ruby 1.9.1.'
+    gem.email = ['me@samlown.com', 'postmodern.mod3@gmail.com']
     gem.homepage = 'http://github.com/postmodern/rubyzip2'
-    gem.authors = ['Postmodern', 'Thomas Sondergaard']
+    gem.authors = ['Postmodern', 'Thomas Sondergaard', 'Sam Lown']
     gem.files =  FileList[
       'README.txt',
       'NEWS.txt',
