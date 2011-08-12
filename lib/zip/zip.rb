@@ -537,7 +537,7 @@ module Zip
     end
     
     def ZipEntry.read_local_entry(io)
-      entry = new(io.path)
+      entry = new(StringIO === io ? nil : io.path)
       entry.read_local_entry(io)
       return entry
     rescue ZipError
