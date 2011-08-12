@@ -741,12 +741,11 @@ end
 module Enumerable
   def compare_enumerables(otherEnumerable)
     otherAsArray = otherEnumerable.to_a
-    index=0
     each_with_index {
       |element, index|
       return false unless yield(element, otherAsArray[index])
     }
-    return index+1 == otherAsArray.size
+    return size == otherAsArray.size
   end
 end
 
@@ -977,7 +976,7 @@ class ZipCentralDirectoryTest < Test::Unit::TestCase
 
   def test_ReadFromTruncatedZipFile
     fragment=""
-    File.open("data/testDirectory.bin") { |f| fragment = f.read }
+    File.open("data/testDirectory.bin", 'rb') { |f| fragment = f.read }
     fragment.slice!(12) # removed part of first cdir entry. eocd structure still complete
     fragment.extend(IOizeString)
     entry = ZipCentralDirectory.new
