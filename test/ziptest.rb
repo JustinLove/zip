@@ -734,6 +734,20 @@ class ZipOutputStreamTest < Test::Unit::TestCase
       File.open(entryName, "rb") { |f| zos.write(f.read) }
     }
   end
+
+  def test_using_stringio
+    zip_io = StringIO.new
+    ZipOutputStream.open(zip_io) do |zip|
+      zip.put_next_entry('foo.txt')
+      zip.write("foo\nbar")
+    end
+
+    ZipInputStream.open(zip_io) do |zip|
+      entry = zip.get_next_entry
+      assert_equal 'foo.txt', entry.name
+      assert_equal "foo\nbar", zip.read
+    end
+  end
 end
 
 

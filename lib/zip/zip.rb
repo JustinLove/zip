@@ -88,7 +88,7 @@ module Zip
     end
     
     def close
-      @archiveIO.close
+      @archiveIO.close unless @archiveIO.is_a? StringIO
     end
 
     # Same as #initialize but if a block is passed the opened
@@ -924,8 +924,14 @@ module Zip
     # exists it will be overwritten.
     def initialize(fileName)
       super()
-      @fileName = fileName
-      @outputStream = File.new(@fileName, "wb")
+      @outputStream = case fileName
+                      when StringIO
+                        @fileName = ''
+                        fileName
+                      else
+                        @fileName = fileName
+                        File.new(@fileName, "wb")
+                      end
       @entrySet = ZipEntrySet.new
       @compressor = NullCompressor.instance
       @closed = false
@@ -950,7 +956,7 @@ module Zip
       finalize_current_entry
       update_local_headers
       write_central_directory
-      @outputStream.close
+      @outputStream.close unless @outputStream.is_a? StringIO
       @closed = true
     end
 
