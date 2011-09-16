@@ -8,13 +8,13 @@ require './lib/zip/version.rb'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = 'zip'
+    gem.name = 'openlogic-zip'
     gem.version = Zip::VERSION
     gem.summary = 'zip is a Ruby library for reading and writing Zip files'
-    gem.description = 'zip is a Ruby library for reading and writing Zip files. Unlike the official rubyzip, zip is compatible with Ruby 1.9.1.'
-    gem.email = ['me@samlown.com', 'postmodern.mod3@gmail.com']
-    gem.homepage = 'http://github.com/postmodern/rubyzip2'
-    gem.authors = ['Postmodern', 'Thomas Sondergaard', 'Sam Lown']
+    gem.description = 'zip is a Ruby library for reading and writing Zip files. Unlike the official rubyzip, zip is compatible with Ruby 1.9.2, and lets you read and write from StringIOs and other IO-like objects.'
+    gem.email = ['todd.thomas@openlogic.com']
+    gem.homepage = 'http://github.com/toddthomas/zip'
+    gem.authors = ['Postmodern', 'Thomas Sondergaard', 'Sam Lown', 'Todd Thomas']
     gem.files =  FileList[
       'README.txt',
       'NEWS.txt',
