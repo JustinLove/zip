@@ -75,12 +75,18 @@ module Zip
   class ZipInputStream 
     include IOExtras::AbstractInputStream
 
-    # Opens the indicated zip file. An exception is thrown
-    # if the specified offset in the specified filename is
-    # not a local zip entry header.
-    def initialize(filename, offset = 0)
+    # Opens the indicated zipfileish thing. If +fileish+ has an IO-like
+    # interface, it becomes the stream from which the zip data is read.
+    # Otherwise, it is taken to be the name of a file to open for reading.
+    # An exception is thrown if the specified offset in the specified
+    # file is not a local zip entry header.
+    def initialize(fileish, offset = 0)
       super()
-      @archiveIO = filename.class == StringIO ? filename : File.open(filename, "rb")
+      @archiveIO = if fileish.respond_to?(:seek)
+                     fileish
+                   else
+                     File.open(fileish, 'rb')
+                   end
       # @archiveIO = File.open(filename, "rb")
       @archiveIO.seek(offset, IO::SEEK_SET)
       @decompressor = NullDecompressor.instance
@@ -88,6 +94,8 @@ module Zip
     end
     
     def close
+      # Don't close a StringIO, because there's no way to reopen it, and
+      # the caller may still want to use it.
       @archiveIO.close unless @archiveIO.is_a? StringIO
     end
 
@@ -920,17 +928,18 @@ module Zip
 
     attr_accessor :comment
 
-    # Opens the indicated zip file. If a file with that name already
-    # exists it will be overwritten.
-    def initialize(fileName)
+    # Opens the indicated zipfileish thing. If +fileish+ has an IO-like
+    # interface, it becomes the output stream. Otherwise, it is taken to
+    # be the name of a file to open for writing. If a file with that name
+    # already exists it will be overwritten.
+    def initialize(fileish)
       super()
-      @outputStream = case fileName
-                      when StringIO
+      @outputStream = if fileish.respond_to?(:tell)
                         @fileName = ''
-                        fileName
+                        fileish
                       else
-                        @fileName = fileName
-                        File.new(@fileName, "wb")
+                        @fileName = fileish
+                        File.new(@fileName, 'wb')
                       end
       @entrySet = ZipEntrySet.new
       @compressor = NullCompressor.instance
@@ -956,6 +965,8 @@ module Zip
       finalize_current_entry
       update_local_headers
       write_central_directory
+      # Don't close a StringIO, because there's no way to reopen it, and
+      # the caller may still want to use it.
       @outputStream.close unless @outputStream.is_a? StringIO
       @closed = true
     end
