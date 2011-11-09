@@ -10,3 +10,7 @@ tmp/*
 *.gemspec
 test/data/generated/
 .rvmrc
+test/*.zip
+test/*.bin
+test/*.txt
+test/extEntry
