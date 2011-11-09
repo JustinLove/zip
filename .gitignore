@@ -8,8 +8,9 @@ tmp/*
 *.swp
 *~
 *.gemspec
-test/data/generated/
 .rvmrc
+Gemfile.lock
+test/data/generated/
 test/*.zip
 test/*.bin
 test/*.txt

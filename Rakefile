@@ -51,6 +51,6 @@ rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
 end
 
-task :test => :check_dependencies do
+task :test do
   ruby %{-C test -I . alltests.rb}
 end
