@@ -27,10 +27,12 @@ module IOExtras  #:nodoc:
     def initialize
       super
       @lineno = 0
+      @pos = 0
       @outputBuffer = ""
     end
 
     attr_accessor :lineno
+    attr_reader :pos
 
     def read(numberOfBytes = nil, buf = nil)
       tbuf = nil
@@ -48,6 +50,8 @@ module IOExtras  #:nodoc:
       else
         tbuf = sysread(numberOfBytes, buf)
       end
+
+      @pos += tbuf.length
 
       return nil unless (tbuf)
 
