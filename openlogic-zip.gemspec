@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "openlogic-zip"
-  s.version = "2.0.3"
+  s.version = "2.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Postmodern", "Thomas Sondergaard", "Sam Lown", "Todd Thomas"]
-  s.date = "2011-11-09"
+  s.date = "2011-11-13"
   s.description = "zip is a Ruby library for reading and writing Zip files. Unlike the official rubyzip, zip is compatible with Ruby 1.9.2, and lets you read and write from StringIOs and other IO-like objects."
   s.email = ["todd.thomas@openlogic.com"]
   s.extra_rdoc_files = [
