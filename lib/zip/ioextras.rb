@@ -77,11 +77,11 @@ module IOExtras  #:nodoc:
       
       bufferIndex=0
       while ((matchIndex = @outputBuffer.index(aSepString, bufferIndex)) == nil)
-	bufferIndex=@outputBuffer.length
-	if input_finished?
-	  return @outputBuffer.empty? ? nil : flush 
-	end
-	@outputBuffer << produce_input
+        bufferIndex=@outputBuffer.length
+        if input_finished?
+          return @outputBuffer.empty? ? nil : flush 
+        end
+        @outputBuffer << produce_input
       end
       sepIndex=matchIndex + aSepString.length
       @pos += sepIndex
