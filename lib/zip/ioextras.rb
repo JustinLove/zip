@@ -84,6 +84,7 @@ module IOExtras  #:nodoc:
 	@outputBuffer << produce_input
       end
       sepIndex=matchIndex + aSepString.length
+      @pos += sepIndex
       return @outputBuffer.slice!(0...sepIndex)
     end
     
